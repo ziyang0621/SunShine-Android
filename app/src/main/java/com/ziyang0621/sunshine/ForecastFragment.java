@@ -1,11 +1,8 @@
 package com.ziyang0621.sunshine;
 
-import android.annotation.TargetApi;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -26,7 +23,7 @@ import com.ziyang0621.sunshine.data.WeatherContract.WeatherEntry;
 import java.util.Date;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Encapsulates fetching the forecast and displaying it as a {@link android.widget.ListView} layout.
  */
 public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
@@ -59,6 +56,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
             WeatherEntry.COLUMN_WEATHER_ID
     };
 
+
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
     // must change.
     public static final int COL_WEATHER_ID = 0;
@@ -81,13 +79,13 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         public void onItemSelected(String date);
     }
 
-
     public ForecastFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
     }
 
@@ -98,31 +96,37 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             updateWeather();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        // The ArrayAdapter will take data from a source and
+        // use it to populate the ListView it's attached to.
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
 
-        mListView = (ListView) rootView.findViewById(
-                R.id.listview_forecast);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        // Get a reference to the ListView, and attach this adapter to it.
+        mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         mListView.setAdapter(mForecastAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    ((Callback) getActivity())
+                    ((Callback)getActivity())
                             .onItemSelected(cursor.getString(COL_WEATHER_DATE));
                 }
                 mPosition = position;
@@ -146,7 +150,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
@@ -176,13 +180,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        updateWeather();
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This is called when a new Loader needs to be created.  This
         // fragment only uses one loader, so we don't care about checking the id.
 
@@ -210,9 +208,8 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         );
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
@@ -221,9 +218,8 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         mForecastAdapter.swapCursor(null);
     }
 
