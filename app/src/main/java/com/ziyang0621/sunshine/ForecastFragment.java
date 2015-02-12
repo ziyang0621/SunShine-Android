@@ -19,6 +19,7 @@ import android.widget.ListView;
 import com.ziyang0621.sunshine.data.WeatherContract;
 import com.ziyang0621.sunshine.data.WeatherContract.LocationEntry;
 import com.ziyang0621.sunshine.data.WeatherContract.WeatherEntry;
+import com.ziyang0621.sunshine.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -156,8 +157,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     private void updateWeather() {
-        String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override
